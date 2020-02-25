@@ -128,7 +128,7 @@ namespace {
                 result.message);
     }
 
-    TEST(Commands, CdCommandNoHome) {
+    void cdCommandNoHome() {
         std::stringstream input("Input"), output;
         Environment env;
         CdCommand command = CdCommand(env);
@@ -139,7 +139,7 @@ namespace {
                 result.message);
     }
 
-    TEST(Commands, CdCommandHome) {
+    void cdCommandHome() {
         std::stringstream input("Input"), output;
         Environment env;
         env.set_variable("HOME", "../test/resources");
@@ -153,7 +153,20 @@ namespace {
         CdCommand(env, "../../build").execute(input, output);
     }
 
-    TEST(Commands, CdCommandBack) {
+    void cdCommand() {
+        std::stringstream input("Input"), output;
+        Environment env;
+        auto path = std::filesystem::canonical(std::filesystem::absolute(std::filesystem::path("../test/resources")));
+        CdCommand command = CdCommand(env, path);
+        auto result = command.execute(input, output);
+        EXPECT_EQ("", output.str());
+        EXPECT_EQ(ExecutionStatus::success, result.status);
+        EXPECT_EQ("", result.message);
+        EXPECT_EQ(std::filesystem::current_path(), path);
+        CdCommand(env, "../../build").execute(input, output);
+    }
+
+    void cdCommandBack() {
         std::stringstream input("Input"), output;
         Environment env;
         auto path = std::filesystem::canonical(std::filesystem::absolute(std::filesystem::path("../test/resources")));
@@ -167,5 +180,11 @@ namespace {
         EXPECT_EQ(std::filesystem::current_path(), path.parent_path());
     }
 
+    TEST(Commands, CdCommand) {
+        cdCommandNoHome();
+        cdCommandHome();
+        cdCommand();
+        cdCommandBack();
+    }
 
 } // namespace

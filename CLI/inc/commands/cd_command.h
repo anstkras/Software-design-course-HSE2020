@@ -1,10 +1,6 @@
 #pragma once
 
-#include <iostream>
 #include <string>
-#include <vector>
-#include <optional>
-#include <memory>
 #include <filesystem>
 
 #include "result.h"
@@ -20,7 +16,7 @@ namespace NCLI::NCommand {
         CdCommand(Environment& env) : env_(env) {};
 
         CdCommand(Environment& env, const std::filesystem::path& path)
-            : env_(env), path_(path) {};
+            : env_(env), path_(std::filesystem::absolute(path)) {};
 
         virtual ExecutionResult execute(std::istream& is, std::ostream& os) override;
 

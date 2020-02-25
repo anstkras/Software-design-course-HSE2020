@@ -1,5 +1,3 @@
-#include <fstream>
-
 #include "commands/cd_command.h"
 
 namespace NCLI::NCommand {
@@ -35,8 +33,12 @@ namespace NCLI::NCommand {
                 return ExecutionResult(NCommand::ExecutionStatus::error,
                         "HOME variable is not specified\n");
             }
-            // TODO check if path is correct
-            return execute_helper(std::filesystem::absolute((std::filesystem::path(home))));
+            auto homePath = std::filesystem::path(home);
+            if (!std::filesystem::exists(homePath)) {
+                return ExecutionResult(NCommand::ExecutionStatus::error,
+                        "Path does not exist " + home + '\n');
+            }
+            return execute_helper(std::filesystem::absolute(homePath));
         }
     }
 
