@@ -22,7 +22,7 @@ namespace NCLI::NCommand {
         return ExecutionResult(ExecutionStatus::success, "");
     }
 
-    ExecutionResult CdCommand::execute(std::istream& is, std::ostream& os) {
+    ExecutionResult CdCommand::execute(std::istream&, std::ostream&) {
         if (!path_.empty()) {
             if (!std::filesystem::exists(path_)) {
                 return ExecutionResult(NCommand::ExecutionStatus::error,
@@ -33,10 +33,10 @@ namespace NCLI::NCommand {
             const std::string& home = env_.get_variable("HOME");
             if (home.empty()) {
                 return ExecutionResult(NCommand::ExecutionStatus::error,
-                        "HOME variable is not specified \n");
+                        "HOME variable is not specified\n");
             }
             // TODO check if path is correct
-            return execute_helper(std::filesystem::path(home));
+            return execute_helper(std::filesystem::absolute((std::filesystem::path(home))));
         }
     }
 

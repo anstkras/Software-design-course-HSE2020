@@ -26,7 +26,7 @@ namespace NCLI::NCommand {
         return ExecutionResult(ExecutionStatus::success, "");
     }
 
-    ExecutionResult LsCommand::execute(std::istream& is, std::ostream& os) {
+    ExecutionResult LsCommand::execute(std::istream&, std::ostream& os) {
         if (!std::filesystem::exists(path_)) {
             return ExecutionResult(NCommand::ExecutionStatus::error,
                     "Path does not exist " + path_.string() + '\n');

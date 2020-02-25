@@ -15,7 +15,7 @@ namespace NCLI::NCommand {
     class LsCommand : public Command {
     public:
 
-        LsCommand() {};
+        LsCommand() : path_(std::filesystem::current_path()) {};
 
         LsCommand(const std::filesystem::path& path)
             : path_(path) {};

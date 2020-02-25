@@ -12,6 +12,8 @@
 #include "commands/external_command.h"
 #include "commands/pwd_command.h"
 #include "commands/wc_command.h"
+#include "commands/cd_command.h"
+#include "commands/ls_command.h"
 
 namespace {
     using namespace NCLI;
@@ -124,6 +126,45 @@ namespace {
         EXPECT_EQ("Can't open file: " +
                 std::string(std::filesystem::absolute("../test/resources/unknown.txt")) + "\n",
                 result.message);
+    }
+
+    TEST(Commands, CdCommandNoHome) {
+        std::stringstream input("Input"), output;
+        Environment env;
+        CdCommand command = CdCommand(env);
+        auto result = command.execute(input, output);
+        EXPECT_EQ("", output.str());
+        EXPECT_EQ(ExecutionStatus::error, result.status);
+        EXPECT_EQ("HOME variable is not specified\n",
+                result.message);
+    }
+
+    TEST(Commands, CdCommandHome) {
+        std::stringstream input("Input"), output;
+        Environment env;
+        env.set_variable("HOME", "../test/resources");
+        auto expectedPath = std::filesystem::canonical(std::filesystem::absolute(std::filesystem::path("../test/resources")));
+        CdCommand command = CdCommand(env);
+        auto result = command.execute(input, output);
+        EXPECT_EQ("", output.str());
+        EXPECT_EQ(ExecutionStatus::success, result.status);
+        EXPECT_EQ("", result.message);
+        EXPECT_EQ(std::filesystem::current_path(), expectedPath);
+        CdCommand(env, "../../build").execute(input, output);
+    }
+
+    TEST(Commands, CdCommandBack) {
+        std::stringstream input("Input"), output;
+        Environment env;
+        auto path = std::filesystem::canonical(std::filesystem::absolute(std::filesystem::path("../test/resources")));
+        CdCommand command = CdCommand(env, path);
+        command.execute(input, output);
+        CdCommand backCommand = CdCommand(env, std::filesystem::path(".."));
+        auto result = backCommand.execute(input, output);
+        EXPECT_EQ("", output.str());
+        EXPECT_EQ(ExecutionStatus::success, result.status);
+        EXPECT_EQ("", result.message);
+        EXPECT_EQ(std::filesystem::current_path(), path.parent_path());
     }
 
 

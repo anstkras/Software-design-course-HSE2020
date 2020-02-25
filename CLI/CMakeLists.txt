@@ -21,6 +21,8 @@ set(SOURCES
     src/commands/cat_command.cpp
     src/commands/assignment_command.cpp
     src/commands/external_command.cpp
+    src/commands/ls_command.cpp
+    src/commands/cd_command.cpp
 )
 
 include_directories(inc/)
