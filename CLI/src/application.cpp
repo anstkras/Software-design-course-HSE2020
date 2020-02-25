@@ -26,6 +26,7 @@ namespace NCLI {
             factory.register_command(std::regex("exit"), NCommand::ExitCommand::create_command);
             factory.register_command(std::regex(".*=.*"),
                     std::bind(NCommand::AssignmentCommand::create_command, env, std::placeholders::_1));
+            factory.register_command(std::regex("cd"), NCommand::CdCommand::create_command, env, std::placeholders::_1);
 
             factory.register_default_command(NCommand::ExternalCommand::create_command);
             return factory;
