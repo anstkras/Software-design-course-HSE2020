@@ -1,12 +1,9 @@
 #pragma once
 
-#include <iostream>
 #include <string>
-#include <memory>
 #include <filesystem>
 
 #include "result.h"
-#include "environment.h"
 #include "commands/command.h"
 #include "commands/execution_result.h"
 
@@ -18,7 +15,7 @@ namespace NCLI::NCommand {
         LsCommand() : path_(std::filesystem::current_path()) {};
 
         LsCommand(const std::filesystem::path& path)
-            : path_(path) {};
+            : path_(std::filesystem::absolute(path)) {};
 
         virtual ExecutionResult execute(std::istream& is, std::ostream& os) override;
 

@@ -128,7 +128,7 @@ namespace {
                 result.message);
     }
 
-    void cdCommandNoHome() {
+    TEST(Commands, CdCommandNoHome) {
         std::stringstream input("Input"), output;
         Environment env;
         CdCommand command = CdCommand(env);
@@ -139,7 +139,7 @@ namespace {
                 result.message);
     }
 
-    void cdCommandHome() {
+    TEST(Commands, CdCommandHome) {
         std::stringstream input("Input"), output;
         Environment env;
         env.set_variable("HOME", "../test/resources");
@@ -153,7 +153,7 @@ namespace {
         CdCommand(env, "../../build").execute(input, output);
     }
 
-    void cdCommand() {
+    TEST(Commands, CdCommand) {
         std::stringstream input("Input"), output;
         Environment env;
         auto path = std::filesystem::canonical(std::filesystem::absolute(std::filesystem::path("../test/resources")));
@@ -166,7 +166,7 @@ namespace {
         CdCommand(env, "../../build").execute(input, output);
     }
 
-    void cdCommandBack() {
+    TEST(Commands, CdCommandBack) {
         std::stringstream input("Input"), output;
         Environment env;
         auto path = std::filesystem::canonical(std::filesystem::absolute(std::filesystem::path("../test/resources")));
@@ -180,11 +180,27 @@ namespace {
         EXPECT_EQ(std::filesystem::current_path(), path.parent_path());
     }
 
-    TEST(Commands, CdCommand) {
-        cdCommandNoHome();
-        cdCommandHome();
-        cdCommand();
-        cdCommandBack();
+    TEST(Commands, LsCommandNoArgument) {
+        std::stringstream input("Input"), output;
+        Environment env;
+        auto path = std::filesystem::canonical(std::filesystem::absolute(std::filesystem::path("../test/resources")));
+        CdCommand(env, path).execute(input, output);
+        LsCommand command = LsCommand();
+        auto result = command.execute(input, output);
+        EXPECT_EQ("test.txt\n", output.str());
+        EXPECT_EQ(ExecutionStatus::success, result.status);
+        EXPECT_EQ("", result.message);
+        CdCommand(env, "../../build").execute(input, output);
+    }
+
+    TEST(Commads, LsCommand) {
+        std::stringstream input("Input"), output;
+        auto path = std::filesystem::canonical(std::filesystem::absolute(std::filesystem::path("../test/resources")));
+        LsCommand command = LsCommand(path);
+        auto result = command.execute(input, output);
+        EXPECT_EQ("test.txt\n", output.str());
+        EXPECT_EQ(ExecutionStatus::success, result.status);
+        EXPECT_EQ("", result.message);
     }
 
 } // namespace
