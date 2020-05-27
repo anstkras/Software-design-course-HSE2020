@@ -1,4 +1,5 @@
 #include "commands/cd_command.h"
+#include <cstring>
 
 namespace NCLI::NCommand {
 
@@ -8,9 +9,12 @@ namespace NCLI::NCommand {
         if (args.size() <= 1) {
             return Result<std::shared_ptr<Command>, std::string>(
                     Ok(std::shared_ptr<Command>(new CdCommand(env))));
-        } else {
+        } else if (args.size() == 2) {
             return Result<std::shared_ptr<Command>, std::string>(
                     Ok(std::shared_ptr<Command>(new CdCommand(env, args[1]))));
+        } else {
+            return Result<std::shared_ptr<Command>, std::string>(
+                        Error((std::string)"Wrong number of arguments."));
         }
     }
 
@@ -26,12 +30,20 @@ namespace NCLI::NCommand {
                 return ExecutionResult(NCommand::ExecutionStatus::error,
                         "Path does not exist " + path_.string() + '\n');
             }
+            if (!std::filesystem::is_directory(path_)) {
+                return ExecutionResult(NCommand::ExecutionStatus::error,
+                        path_.string() + " is not a directory\n");
+            }
             return execute_helper(path_);
         } else {
-            const std::string& home = env_.get_variable("HOME");
+            std::string home = env_.get_variable("HOME");
             if (home.empty()) {
-                return ExecutionResult(NCommand::ExecutionStatus::error,
-                        "HOME variable is not specified\n");
+                char *homeEnv = std::getenv("HOME");
+                if (homeEnv == nullptr || std::strlen(homeEnv) == 0) {
+                    return ExecutionResult(NCommand::ExecutionStatus::error,
+                            "HOME variable is not specified\n");
+                }
+                home = std::string(homeEnv);
             }
             auto homePath = std::filesystem::path(home);
             if (!std::filesystem::exists(homePath)) {

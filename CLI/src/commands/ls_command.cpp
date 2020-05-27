@@ -7,9 +7,12 @@ namespace NCLI::NCommand {
         if (args.size() <= 1) {
             return Result<std::shared_ptr<Command>, std::string>(
                     Ok(std::shared_ptr<Command>(new LsCommand())));
-        } else {
+        } else if (args.size() == 2) {
             return Result<std::shared_ptr<Command>, std::string>(
                     Ok(std::shared_ptr<Command>(new LsCommand(args[1]))));
+        } else {
+            return Result<std::shared_ptr<Command>, std::string>(
+                        Error((std::string)"Wrong number of arguments."));
         }
     }
 
