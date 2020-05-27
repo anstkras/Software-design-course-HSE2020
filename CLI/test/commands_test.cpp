@@ -12,6 +12,8 @@
 #include "commands/external_command.h"
 #include "commands/pwd_command.h"
 #include "commands/wc_command.h"
+#include "commands/cd_command.h"
+#include "commands/ls_command.h"
 
 namespace {
     using namespace NCLI;
@@ -126,5 +128,68 @@ namespace {
                 result.message);
     }
 
+    TEST(Commands, CdCommandHome) {
+        std::stringstream input("Input"), output;
+        Environment env;
+        env.set_variable("HOME", "../test/resources");
+        auto expectedPath = std::filesystem::canonical(std::filesystem::absolute(std::filesystem::path("../test/resources")));
+        auto command = CdCommand(env);
+        auto result = command.execute(input, output);
+        EXPECT_EQ("", output.str());
+        EXPECT_EQ(ExecutionStatus::success, result.status);
+        EXPECT_EQ("", result.message);
+        EXPECT_EQ(std::filesystem::current_path(), expectedPath);
+        CdCommand(env, "../../build").execute(input, output);
+    }
+
+    TEST(Commands, CdCommand) {
+        std::stringstream input("Input"), output;
+        Environment env;
+        auto path = std::filesystem::canonical(std::filesystem::absolute(std::filesystem::path("../test/resources")));
+        auto command = CdCommand(env, path);
+        auto result = command.execute(input, output);
+        EXPECT_EQ("", output.str());
+        EXPECT_EQ(ExecutionStatus::success, result.status);
+        EXPECT_EQ("", result.message);
+        EXPECT_EQ(std::filesystem::current_path(), path);
+        CdCommand(env, "../../build").execute(input, output);
+    }
+
+    TEST(Commands, CdCommandBack) {
+        std::stringstream input("Input"), output;
+        Environment env;
+        auto path = std::filesystem::canonical(std::filesystem::absolute(std::filesystem::path("../test/resources")));
+        auto command = CdCommand(env, path);
+        command.execute(input, output);
+        auto backCommand = CdCommand(env, std::filesystem::path(".."));
+        auto result = backCommand.execute(input, output);
+        EXPECT_EQ("", output.str());
+        EXPECT_EQ(ExecutionStatus::success, result.status);
+        EXPECT_EQ("", result.message);
+        EXPECT_EQ(std::filesystem::current_path(), path.parent_path());
+    }
+
+    TEST(Commands, LsCommandNoArgument) {
+        std::stringstream input("Input"), output;
+        Environment env;
+        auto path = std::filesystem::canonical(std::filesystem::absolute(std::filesystem::path("../test/resources")));
+        CdCommand(env, path).execute(input, output);
+        auto command = LsCommand();
+        auto result = command.execute(input, output);
+        EXPECT_EQ("test.txt\n", output.str());
+        EXPECT_EQ(ExecutionStatus::success, result.status);
+        EXPECT_EQ("", result.message);
+        CdCommand(env, "../../build").execute(input, output);
+    }
+
+    TEST(Commads, LsCommand) {
+        std::stringstream input("Input"), output;
+        auto path = std::filesystem::canonical(std::filesystem::absolute(std::filesystem::path("../test/resources")));
+        auto command = LsCommand(path);
+        auto result = command.execute(input, output);
+        EXPECT_EQ("test.txt\n", output.str());
+        EXPECT_EQ(ExecutionStatus::success, result.status);
+        EXPECT_EQ("", result.message);
+    }
 
 } // namespace
